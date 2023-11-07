@@ -34,7 +34,7 @@ class Motherboard:
         self.cartridge = cartridge.load_cartridge(gamerom_file)
         if cgb is None:
             cgb = self.cartridge.cgb
-            logger.debug(f'Cartridge type auto-detected to {"CGB" if cgb else "DMG"}')
+            logger.debug("Cartridge type auto-detected to %s", ("CGB" if cgb else "DMG"))
 
         self.timer = timer.Timer()
         self.interaction = interaction.Interaction()
@@ -134,11 +134,11 @@ class Motherboard:
         logger.debug("Loading state...")
         state_version = f.read()
         if state_version >= 2:
-            logger.debug(f"State version: {state_version}")
+            logger.debug("State version: %d", state_version)
             # From version 2 and above, this is the version number
             self.bootrom_enabled = f.read()
         else:
-            logger.debug(f"State version: 0-1")
+            logger.debug("State version: 0-1")
             # HACK: The byte wasn't a state version, but the bootrom flag
             self.bootrom_enabled = state_version
         if state_version >= 8:
@@ -146,7 +146,7 @@ class Motherboard:
             self.double_speed = f.read()
             _cgb = f.read()
             if self.cgb != _cgb:
-                logger.critical(f"Loading state which is not CGB, but PyBoy is loaded in CGB mode!")
+                logger.critical("Loading state which is not CGB, but PyBoy is loaded in CGB mode!")
                 return
             self.cgb = _cgb
             if self.cgb:
@@ -338,16 +338,16 @@ class Motherboard:
             elif self.cgb and i == 0xFF6B:
                 return self.lcd.ocpd.get()
             elif self.cgb and i == 0xFF51:
-                # logger.error("HDMA1 is not readable")
+                logger.debug("HDMA1 is not readable")
                 return 0x00 # Not readable
             elif self.cgb and i == 0xFF52:
-                # logger.error("HDMA2 is not readable")
+                logger.debug("HDMA2 is not readable")
                 return 0x00 # Not readable
             elif self.cgb and i == 0xFF53:
-                # logger.error("HDMA3 is not readable")
+                logger.debug("HDMA3 is not readable")
                 return 0x00 # Not readable
             elif self.cgb and i == 0xFF54:
-                # logger.error("HDMA4 is not readable")
+                logger.debug("HDMA4 is not readable")
                 return 0x00 # Not readable
             elif self.cgb and i == 0xFF55:
                 return self.hdma.hdma5 & 0xFF
@@ -356,8 +356,8 @@ class Motherboard:
             return self.ram.internal_ram1[i - 0xFF80]
         elif i == 0xFFFF: # Interrupt Enable Register
             return self.cpu.interrupts_enabled_register
-        # else:
-        #     logger.critical("Memory access violation. Tried to read: %0.4x", i)
+        else:
+            logger.critical("Memory access violation. Tried to read: %0.4x", i)
 
     def setitem(self, i, value):
         if 0x0000 <= i < 0x4000: # 16kB ROM bank #0
@@ -449,7 +449,7 @@ class Motherboard:
                 self.ram.io_ports[i - 0xFF00] = value
         elif 0xFF4C <= i < 0xFF80: # Empty but unusable for I/O
             if self.bootrom_enabled and i == 0xFF50 and (value == 0x1 or value == 0x11):
-                # logger.debug("Bootrom disabled!")
+                logger.debug("Bootrom disabled!")
                 self.bootrom_enabled = False
             # CGB registers
             elif self.cgb and i == 0xFF4D:
@@ -484,8 +484,8 @@ class Motherboard:
             self.ram.internal_ram1[i - 0xFF80] = value
         elif i == 0xFFFF: # Interrupt Enable Register
             self.cpu.interrupts_enabled_register = value
-        # else:
-        #     logger.critical("Memory access violation. Tried to write: 0x%0.2x to 0x%0.4x", value, i)
+        else:
+            logger.critical("Memory access violation. Tried to write: 0x%0.2x to 0x%0.4x", value, i)
 
     def transfer_DMA(self, src):
         # http://problemkaputt.de/pandocs.htm#lcdoamdmatransfers
