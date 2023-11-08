@@ -358,8 +358,8 @@ class Motherboard:
             return self.ram.internal_ram1[i - 0xFF80]
         elif i == 0xFFFF: # Interrupt Enable Register
             return self.cpu.interrupts_enabled_register
-        else:
-            logger.critical("Memory access violation. Tried to read: %0.4x", i)
+        # else:
+        #     logger.critical("Memory access violation. Tried to read: %0.4x", i)
 
     def setitem(self, i, value):
         if 0x0000 <= i < 0x4000: # 16kB ROM bank #0
@@ -486,8 +486,8 @@ class Motherboard:
             self.ram.internal_ram1[i - 0xFF80] = value
         elif i == 0xFFFF: # Interrupt Enable Register
             self.cpu.interrupts_enabled_register = value
-        else:
-            logger.critical("Memory access violation. Tried to write: 0x%0.2x to 0x%0.4x", value, i)
+        # else:
+        #     logger.critical("Memory access violation. Tried to write: 0x%0.2x to 0x%0.4x", value, i)
 
     def transfer_DMA(self, src):
         # http://problemkaputt.de/pandocs.htm#lcdoamdmatransfers
