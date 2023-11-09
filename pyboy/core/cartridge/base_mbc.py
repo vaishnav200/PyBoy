@@ -4,15 +4,15 @@
 #
 
 import array
-import logging
 import os
 
-from pyboy.logger import logger
+import pyboy
+from pyboy import utils
 from pyboy.utils import IntIOWrapper
 
 from .rtc import RTC
 
-logger = logging.getLogger(__name__)
+logger = pyboy.logging.get_logger(__name__)
 
 
 class BaseMBC:
@@ -108,8 +108,8 @@ class BaseMBC:
     def overrideitem(self, rom_bank, address, value):
         if 0x0000 <= address < 0x4000:
             logger.debug(
-                "Performing overwrite on address: 0x%04x:0x%04x. New value: 0x%04x Old value: 0x%04x",
-                rom_bank, address, value, self.rombanks[rom_bank][address]
+                "Performing overwrite on address: 0x%04x:0x%04x. New value: 0x%04x Old value: 0x%04x", rom_bank,
+                address, value, self.rombanks[rom_bank][address]
             )
             self.rombanks[rom_bank][address] = value
         else:
